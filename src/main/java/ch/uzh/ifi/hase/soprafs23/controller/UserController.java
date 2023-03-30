@@ -5,7 +5,9 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -22,6 +24,10 @@ import java.util.List;
 public class UserController {
 
   private final UserService userService;
+  private int socketCounter = 0;
+
+  @Autowired
+  SimpMessagingTemplate socketMessage;
 
   UserController(UserService userService) {
     this.userService = userService;
@@ -54,4 +60,12 @@ public class UserController {
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
+
+    @GetMapping("/socket")
+    @ResponseStatus(HttpStatus.OK)
+    public void socketTest() {
+        socketCounter += 1;
+        socketMessage.convertAndSend("/topic/game/test/", socketCounter);
+    }
+
 }
